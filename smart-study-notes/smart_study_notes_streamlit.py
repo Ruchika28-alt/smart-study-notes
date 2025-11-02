@@ -1,8 +1,7 @@
 import streamlit as st
 import pdfplumber
 import os
-from google import genai
-from google.genai import types
+import google.generativeai as genai
 
 # ---------------------------------------------------------
 # 🧠 SMART STUDY NOTES GENERATOR (Gemini Free Version)
@@ -23,8 +22,8 @@ if not api_key:
     st.info("Go to [https://aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey) → Create key → Paste it under 'Settings → Secrets' as GEMINI_API_KEY.")
     st.stop()
 
-# Initialize Gemini client
-client = genai.Client(api_key=api_key)
+# Configure Gemini client
+genai.configure(api_key=api_key)
 
 # ---------------------------------------------------------
 # 📂 File Upload Section
@@ -55,20 +54,16 @@ if uploaded_file:
         with st.spinner("Generating notes using Gemini... ⏳"):
             try:
                 prompt = f"""
-                You are a smart study assistant. Summarize the following text into concise, easy-to-read study notes in bullet points.
+                Summarize the following text into concise, easy-to-read study notes in bullet points.
                 Also, create 5–10 quiz questions to test understanding of the content.
 
                 Text:
-                {text[:12000]}  # limit to prevent overflow
+                {text[:12000]}
                 """
 
-                response = client.models.generate_content(
-                    model="gemini-1.5-flash",
-                    contents=prompt,
-                    config=types.GenerateContentConfig(
-                        temperature=0.4,
-                    ),
-                )
+                # Use a supported model name
+                model = genai.GenerativeModel("gemini-1.5-flash-latest")
+                response = model.generate_content(prompt)
 
                 summary_output = response.text.strip()
 
