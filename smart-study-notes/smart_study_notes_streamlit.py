@@ -4,9 +4,8 @@ import os
 import google.generativeai as genai
 
 # ---------------------------------------------------------
-# 🧠 SMART STUDY NOTES GENERATOR (Gemini Free Version)
+# 🧠 SMART STUDY NOTES GENERATOR (Gemini Free API)
 # ---------------------------------------------------------
-
 st.set_page_config(page_title="🧠 Smart Study Notes Generator", layout="wide")
 
 st.title("🧠 Smart Study Notes Generator")
@@ -19,14 +18,14 @@ api_key = st.secrets.get("GEMINI_API_KEY") or os.getenv("GEMINI_API_KEY")
 
 if not api_key:
     st.warning("⚠️ Please add your Gemini API key in Streamlit Secrets or environment variable.")
-    st.info("Go to [https://aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey) → Create key → Paste it under 'Settings → Secrets' as GEMINI_API_KEY.")
+    st.info("Create one at [https://aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)")
     st.stop()
 
 # Configure Gemini client
 genai.configure(api_key=api_key)
 
 # ---------------------------------------------------------
-# 📂 File Upload Section
+# 📂 Upload section
 # ---------------------------------------------------------
 uploaded_file = st.file_uploader("📄 Upload your lecture notes (.pdf or .txt)", type=["pdf", "txt"])
 
@@ -45,36 +44,35 @@ if uploaded_file:
         st.stop()
 
     st.success("✅ Text extracted successfully!")
-    st.text_area("📜 Extracted Text Preview (first 1000 chars)", text[:1000], height=200)
+    st.text_area("📜 Preview (first 1000 chars)", text[:1000], height=200)
 
     # ---------------------------------------------------------
-    # 🚀 Generate Study Notes
+    # 🚀 Generate Notes
     # ---------------------------------------------------------
     if st.button("✨ Generate Study Notes and Quiz"):
         with st.spinner("Generating notes using Gemini... ⏳"):
             try:
                 prompt = f"""
-                Summarize the following text into concise, easy-to-read study notes in bullet points.
-                Also, create 5–10 quiz questions to test understanding of the content.
+                You are a helpful study assistant.
+                Summarize the following text into concise, bullet-point study notes.
+                Then create 5–10 quiz questions to test understanding of the material.
 
                 Text:
                 {text[:12000]}
                 """
 
-                # Use a supported model name
+                # Supported model
                 model = genai.GenerativeModel("gemini-1.5-flash-latest")
                 response = model.generate_content(prompt)
 
-                summary_output = response.text.strip()
+                result = response.text.strip()
 
-                # Display Output
-                st.subheader("📘 Generated Study Notes & Quiz")
-                st.write(summary_output)
+                st.subheader("📘 Study Notes & Quiz")
+                st.write(result)
 
-                # Download Option
                 st.download_button(
-                    label="📥 Download Summary as Text File",
-                    data=summary_output,
+                    label="📥 Download Summary",
+                    data=result,
                     file_name="study_notes.txt",
                     mime="text/plain"
                 )
