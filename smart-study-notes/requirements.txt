@@ -5,3 +5,5 @@ PyPDF2
 streamlit
 pdfplumber
 google-genai
+google-generativeai
+
